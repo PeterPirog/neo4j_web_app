@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local MCP configuration with secrets
+.mcp.neo4j.json
+.ai/mcp/*.local.json
