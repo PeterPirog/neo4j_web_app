@@ -149,13 +149,18 @@ activemq-data/
 
 # Environments
 .env
+.env.local
 .envrc
 .venv
+.venv/
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+apps/api/.env
+apps/api/.venv/
+apps/web/.env.local
 
 # Spyder project settings
 .spyderproject
@@ -218,8 +223,23 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Local MCP configuration with secrets
+.mcp.json
+.mcp.local.json
 .mcp.neo4j.json
 .ai/mcp/*.json
 .ai/mcp/*.local.json
 
 .idea/
+
+# Node / Next.js / frontend tests
+node_modules/
+.next/
+apps/web/.next/
+*.tsbuildinfo
+playwright-report/
+apps/web/playwright-report/
+test-results/
+apps/web/test-results/
+coverage/
+dist/
+build/

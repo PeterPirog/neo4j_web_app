@@ -1,53 +1,51 @@
 # Architecture
 
-## Warstwy
+```text
+Browser
+  -> Next.js / React / TypeScript
+  -> FastAPI
+  -> service layer
+  -> repository / query layer
+  -> async Neo4j driver / neo4j-rust-ext
+  -> Neo4j
+```
 
-1. `app/main.py`
-   Endpointy HTTP, walidacja wejścia na poziomie formularzy, przekierowania, odpowiedzi JSON i renderowanie szablonów.
+## Backend
 
-2. `app/*_service.py`
-   Logika aplikacyjna związana z Neo4j. Tu powinny trafiać zapytania Cypher i operacje na sesjach drivera.
+Backend code lives in `apps/api/app`.
 
-3. `app/db.py`
-   Konfiguracja `AsyncGraphDatabase`, lifespan FastAPI, zamykanie drivera.
+- `main.py` creates the FastAPI app, configures lifespan, CORS and routers, and
+  exposes root and health endpoints.
+- `core/` contains config, CORS, errors and logging helpers.
+- `db/neo4j.py` owns the async Neo4j driver lifecycle.
+- `modules/<module>/router.py` owns HTTP endpoints.
+- `modules/<module>/schemas.py` owns Pydantic models.
+- `modules/<module>/service.py` owns application logic.
+- `modules/<module>/repository.py` owns Neo4j calls.
+- `modules/<module>/queries.py` owns Cypher.
 
-4. `app/templates/`
-   Szablony Jinja2 i markup Bootstrap.
+## Frontend
 
-## Zasady zależności
+Frontend code lives in `apps/web`.
 
-- Endpointy mogą wołać serwisy.
-- Serwisy mogą używać async drivera Neo4j.
-- Szablony nie zawierają logiki dostępu do danych.
-- MCP Neo4j nie jest importowany w kodzie aplikacji.
+- Next.js App Router owns routes and layouts.
+- TanStack Query owns client-side fetching and invalidation.
+- React Hook Form and Zod own form state and validation.
+- Tailwind CSS owns the current design system.
+- The generated OpenAPI client lives in `packages/api-client`.
 
-## Sesje Neo4j
+## Neo4j Sessions
 
-Używaj:
+Use async sessions with an explicit database:
 
 ```python
 async with driver.session(database=NEO4J_DATABASE) as session:
-    result = await session.run(query, parameter=value)
+    result = await session.run(query, id=person_id)
 ```
 
-Nie używaj synchronicznych sesji ani globalnego klienta innego niż zarządzany async driver.
+Never use a synchronous Neo4j driver.
 
-## Model danych
+## MCP
 
-Aktualny model edukacyjny:
-
-- `(:Person {id, name, email, note, created_at, updated_at})`
-- `(:City {id, name, country, note, created_at, updated_at})`
-- `(:Person)-[:MIESZKA_W {created_at, updated_at}]->(:City)`
-
-Aktualne pliki serwisowe:
-
-- `app/people_service.py` - operacje na osobach i odczyt miast przypisanych przez `MIESZKA_W`.
-- `app/cities_service.py` - operacje na miastach.
-- `app/relationships_service.py` - tworzenie, listowanie i usuwanie relacji `MIESZKA_W`.
-
-Aktualny widok:
-
-- `app/templates/people.html` - jeden widok edukacyjny z formularzami dla osób, miast i relacji.
-
-Docelowo model może obejmować użytkowników, zasoby, role, relacje dostępu, dokumenty, embeddingi i relacje predykcyjne.
+MCP Neo4j is allowed only for agent diagnostics and must not be imported by the
+runtime application.

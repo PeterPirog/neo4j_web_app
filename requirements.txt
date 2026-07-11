@@ -1,6 +1,3 @@
-fastapi
-uvicorn[standard]
-jinja2
-python-dotenv
-python-multipart
-neo4j-rust-ext
+# Compatibility shim for older local commands.
+# Backend dependencies live in apps/api/requirements.txt.
+-r apps/api/requirements.txt

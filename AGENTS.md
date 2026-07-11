@@ -1,105 +1,104 @@
 # AGENTS.md
 
-## Cel projektu
+## Project Goal
 
-Projekt to aplikacja webowa dla Neo4j oparta o:
+This repository is being developed as a long-term Neo4j graph application with:
 
-- FastAPI
-- Jinja2 Templates
-- Bootstrap 5
-- async Neo4j driver / neo4j-rust-ext
-- czysty Cypher
-- lokalną bazę Neo4j
-- MCP Neo4j jako narzędzie diagnostyczne agenta
+- Next.js / React / TypeScript frontend in `apps/web`.
+- FastAPI JSON API in `apps/api`.
+- Service, repository and query layers for Neo4j access.
+- Official async Neo4j driver / `neo4j-rust-ext`.
+- Pure parameterized Cypher.
+- Local Neo4j database.
+- MCP Neo4j only as an agent diagnostic tool.
 
-Aplikacja ma być rozwijana w kierunku dużego profesjonalnego systemu grafowego z obsługą:
+The current implemented domain covers:
 
-- relacji w Neo4j,
-- uprawnień użytkowników do zasobów,
-- AI / GraphRAG,
-- agentów,
-- GDS / predykcji relacji.
+- `Person` nodes.
+- Whitelisted Person-to-Person relationships.
+- Placeholder modules for permissions, graph explorer, AI / GraphRAG and ML.
 
-Aktualny zakres edukacyjny obejmuje:
+Legacy Jinja2 templates from the educational app are preserved in
+`apps/api/app/legacy_templates/`.
 
-- węzły `Person`,
-- węzły `City`,
-- relację `(:Person)-[:MIESZKA_W]->(:City)`,
-- prosty interfejs CRUD do ćwiczenia dodawania, edycji i usuwania danych oraz relacji.
+## Mandatory Architecture
 
-## Architektura obowiązkowa
+Do not use:
 
-Nie używaj:
+- Django.
+- Django ORM.
+- SQLAlchemy.
+- neomodel.
+- OGM.
+- GraphQL at this stage.
+- Synchronous Neo4j driver.
+- Runtime MCP dependencies.
 
-- Django
-- Django ORM
-- SQLAlchemy
-- neomodel
-- OGM
-- GraphQL na obecnym etapie
-- synchronicznego drivera Neo4j
+Use:
 
-Używaj:
+- FastAPI.
+- async/await.
+- `from neo4j import AsyncGraphDatabase`.
+- Raw Cypher.
+- Parameterized queries.
+- Service layer, repository layer and query files for Neo4j access.
+- Next.js / React / TypeScript for the target frontend.
 
-- FastAPI
-- async/await
-- `from neo4j import AsyncGraphDatabase`
-- surowego Cyphera
-- zapytań parametryzowanych
-- warstwy serwisowej dla zapytań do Neo4j
-- Jinja2 + Bootstrap dla prostego UI
+## Neo4j Rules
 
-## Zasady pracy z Neo4j
+Application runtime communicates with Neo4j only through the official async
+driver.
 
-Kod aplikacji komunikuje się z Neo4j przez async Neo4j driver.
+MCP Neo4j may be used by agents for:
 
-MCP Neo4j może być używany przez agenta do:
+- diagnostics,
+- schema inspection,
+- node counts,
+- relationship previews,
+- read-only Cypher checks.
 
-- diagnostyki,
-- sprawdzania schematu,
-- liczenia węzłów,
-- podglądu relacji,
-- testowania zapytań Cypher.
+MCP Neo4j is not part of application runtime.
 
-MCP Neo4j nie jest częścią runtime aplikacji.
+Do not delete database data without explicit user approval. Do not run
+destructive Cypher such as broad `DETACH DELETE`, `DROP CONSTRAINT`, `DROP
+INDEX` or database resets unless the user explicitly requests it.
 
-Nie wolno usuwać danych z bazy bez wyraźnego polecenia użytkownika.
+## Cypher Safety
 
-## Bezpieczeństwo Cypher
+Always parameterize user data.
 
-Zawsze parametryzuj dane użytkownika.
-
-Dobrze:
+Good:
 
 ```cypher
 MATCH (p:Person {id: $person_id})
 RETURN p
 ```
 
-Źle:
+Bad:
 
 ```python
 query = f"MATCH (p:Person {{id: '{person_id}'}}) RETURN p"
 ```
 
-Nie wykonuj zapytań `DELETE`, `DETACH DELETE`, `DROP CONSTRAINT`, `DROP INDEX` ani masowych `SET` bez jasnej zgody użytkownika.
+Dynamic relationship types are allowed only after whitelist validation.
 
-## Praca agenta
+## Agent Workflow
 
-Przed zmianami w kodzie agent powinien:
+Before code changes:
 
-- przeczytać `README.md`, `AGENTS.md` i pliki w `.ai/`,
-- sprawdzić obecne wzorce w `app/`,
-- ustalić, czy zmiana dotyczy aplikacji runtime czy wyłącznie diagnostyki,
-- nie instalować nowych pakietów bez polecenia użytkownika,
-- nie modyfikować `.env` i nie dodawać sekretów do repozytorium.
+- Read `README.md`, `AGENTS.md` and relevant files in `.ai/`.
+- Inspect current patterns in `apps/api/app` and `apps/web/src`.
+- Decide whether the change affects runtime or diagnostics only.
+- Do not install packages unless the user requested it.
+- Do not modify `.env` and do not add secrets.
 
 ## Definition of Done
 
-Zmiana jest zakończona, gdy:
+A change is done when:
 
-- nie narusza architektury FastAPI + async Neo4j driver,
-- nie wprowadza ORM, OGM, SQLAlchemy ani runtime MCP,
-- używa parametryzowanego Cyphera,
-- ma jasną separację endpointów, serwisów i szablonów,
-- została zweryfikowana testem, uruchomieniem lub opisem ryzyka, jeżeli testy nie istnieją.
+- It keeps FastAPI + async Neo4j driver architecture.
+- It does not introduce ORM, OGM, SQLAlchemy, Django or runtime MCP.
+- It uses parameterized Cypher.
+- It keeps clear separation of routers, services, repositories and queries.
+- It keeps frontend API access through FastAPI only.
+- It is verified by tests, compile checks, app startup or a clear risk note.

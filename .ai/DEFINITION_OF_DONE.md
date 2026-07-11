@@ -1,19 +1,22 @@
 # Definition of Done
 
-Zmiana jest gotowa, gdy spełnia poniższe warunki:
+A change is ready when it:
 
-- Zachowuje architekturę FastAPI + async Neo4j driver.
-- Nie dodaje Django, SQLAlchemy, neomodel, OGM ani GraphQL.
-- Nie dodaje MCP Neo4j jako zależności runtime.
-- Używa parametryzowanego Cyphera.
-- Nie zapisuje sekretów w repozytorium.
-- Nie modyfikuje `.env`.
-- Nie wykonuje destrukcyjnych operacji na Neo4j bez zgody.
-- Jest spójna z istniejącymi plikami w `app/`.
-- Ma podstawową weryfikację: test, uruchomienie aplikacji, sprawdzenie importów albo opis ograniczeń.
+- Preserves the Next.js + FastAPI + async Neo4j driver architecture.
+- Does not add Django, SQLAlchemy, neomodel, OGM or GraphQL.
+- Does not add MCP Neo4j as a runtime dependency.
+- Uses parameterized Cypher.
+- Does not store secrets in the repository.
+- Does not modify real `.env` files.
+- Does not perform destructive Neo4j operations without explicit approval.
+- Keeps backend code separated into routers, schemas, services, repositories and
+  query files.
+- Keeps frontend communication limited to the FastAPI API.
+- Includes basic verification: tests, compile checks, app import, app startup or
+  a documented limitation.
 
-Przy zmianach w danych lub schemacie dodatkowo:
+For schema or data changes:
 
-- dodano lub zaktualizowano `cypher/schema.cypher`,
-- dodano bezpieczne zapytanie diagnostyczne,
-- opisano wpływ na istniejące dane.
+- Keep idempotent schema Cypher in `cypher/constraints` or `cypher/indexes`.
+- Keep read-only diagnostics in `cypher/diagnostics`.
+- Describe the impact on existing data.

@@ -1,47 +1,45 @@
 # Project Context
 
-Ten projekt to aplikacja webowa FastAPI + Neo4j. Obecny zakres obejmuje edukacyjny interfejs Jinja2/Bootstrap oraz operacje na węzłach `Person`, węzłach `City` i relacjach `MIESZKA_W`.
+This project is a FastAPI + Neo4j graph application being transformed into a
+monorepo with a Next.js frontend.
 
-## Stos
+## Stack
 
-- FastAPI jako framework HTTP.
-- Jinja2 Templates jako warstwa widoków HTML.
-- Bootstrap 5 jako podstawowy system UI.
-- Oficjalny async Neo4j driver przez `neo4j-rust-ext`.
-- Czysty, parametryzowany Cypher.
-- Lokalna baza Neo4j.
-- MCP Neo4j wyłącznie jako narzędzie diagnostyczne agenta.
+- `apps/web`: Next.js, React, TypeScript, Tailwind CSS, TanStack Query, React
+  Hook Form and Zod.
+- `apps/api`: FastAPI JSON API.
+- Neo4j access through the official async driver / `neo4j-rust-ext`.
+- Pure parameterized Cypher.
+- MCP Neo4j only as an agent diagnostic tool.
 
-## Granice projektu
+## Runtime Boundary
 
-Aplikacja runtime nie może zależeć od MCP. Runtime komunikuje się z bazą wyłącznie przez `AsyncGraphDatabase`.
+The frontend communicates only with FastAPI. It must not contain Cypher and must
+not connect directly to Neo4j.
 
-Nie dodawaj Django, SQLAlchemy, neomodel, OGM, GraphQL ani synchronicznego drivera Neo4j.
+FastAPI communicates with Neo4j through:
 
-## Aktualny model danych
+- `router.py`
+- `schemas.py`
+- `service.py`
+- `repository.py`
+- `queries.py`
 
-- `(:Person {id, name, email, note, created_at, updated_at})`
-- `(:City {id, name, country, note, created_at, updated_at})`
-- `(:Person)-[:MIESZKA_W {created_at, updated_at}]->(:City)`
+## Current Domain
 
-Relacja `MIESZKA_W` jest tworzona przez formularz przypisania osoby do miasta. Usuwanie osoby lub miasta używa ograniczonego `MATCH` po `id` i usuwa także relacje tej encji, żeby można było ćwiczyć pełny cykl CRUD w lokalnej bazie.
+- `Person` nodes.
+- Whitelisted Person-to-Person relationships:
+  - `KNOWS`
+  - `WORKS_WITH`
+  - `MANAGES`
+  - `REPORTS_TO`
+  - `RELATED_TO`
 
-## Obecne pliki aplikacji
+Placeholder modules:
 
-- `app/main.py` - endpointy FastAPI, obsługa formularzy, renderowanie Jinja2.
-- `app/db.py` - konfiguracja i cykl życia async drivera Neo4j.
-- `app/people_service.py` - warstwa serwisowa dla `Person` oraz idempotentne constrainty i indeksy.
-- `app/cities_service.py` - warstwa serwisowa dla `City`.
-- `app/relationships_service.py` - warstwa serwisowa dla relacji `MIESZKA_W`.
-- `app/templates/people.html` - jeden edukacyjny widok HTML dla osób, miast i relacji.
+- permissions
+- graph explorer
+- AI / GraphRAG
+- ML
 
-## Pliki Cypher
-
-- `cypher/schema.cypher` - constrainty i indeksy dla `Person` oraz `City`.
-- `cypher/diagnostics.cypher` - bezpieczne zapytania odczytujące etykiety, typy relacji, osoby, miasta i `MIESZKA_W`.
-- `cypher/seed_dev.cypher` - niedestrukcyjny seed lokalny oparty o `MERGE`.
-- `cypher/dangerous_reset.cypher` - celowo nieaktywny szablon resetu z ostrzeżeniami.
-
-## Kierunek rozwoju
-
-Projekt ma iść w stronę profesjonalnego systemu grafowego z relacjami, uprawnieniami do zasobów, GraphRAG, agentami oraz późniejszym użyciem GDS.
+Legacy Jinja2 templates are preserved in `apps/api/app/legacy_templates/`.
