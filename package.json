@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/api-client"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "generate:api-client": "openapi-typescript http://127.0.0.1:8000/openapi.json -o packages/api-client/src/schema.d.ts",
+    "typecheck:web": "npm --workspace apps/web run typecheck",
+    "lint:web": "npm --workspace apps/web run lint",
+    "test:e2e": "npm --workspace apps/web run test:e2e"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.6.1"
+  }
+}

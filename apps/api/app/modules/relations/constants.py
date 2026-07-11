@@ -1,0 +1,7 @@
+ALLOWED_RELATIONSHIP_TYPES = {
+    "KNOWS",
+    "WORKS_WITH",
+    "MANAGES",
+    "REPORTS_TO",
+    "RELATED_TO",
+}

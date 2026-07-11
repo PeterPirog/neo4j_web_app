@@ -1,0 +1,7 @@
+fastapi
+pydantic
+uvicorn[standard]
+jinja2
+python-dotenv
+python-multipart
+neo4j-rust-ext
