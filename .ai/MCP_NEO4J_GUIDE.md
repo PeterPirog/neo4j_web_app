@@ -33,6 +33,23 @@ ORDER BY p.name
 LIMIT 25
 ```
 
+```cypher
+MATCH (c:City)
+RETURN c.id AS id, c.name AS name, properties(c)['country'] AS country
+ORDER BY c.name
+LIMIT 25
+```
+
+```cypher
+MATCH (p:Person)-[r:MIESZKA_W]->(c:City)
+RETURN
+    p.name AS person_name,
+    type(r) AS relationship_type,
+    c.name AS city_name
+ORDER BY person_name, city_name
+LIMIT 25
+```
+
 ## Niedozwolone bez zgody
 
 - `DETACH DELETE`

@@ -5,6 +5,7 @@ Dodaj funkcję do projektu FastAPI + Neo4j.
 Zasady:
 
 - Najpierw przeczytaj `AGENTS.md` i `.ai/ARCHITECTURE.md`.
+- Uwzględnij aktualny model edukacyjny: `Person`, `City` i `MIESZKA_W`.
 - Nie używaj Django, SQLAlchemy, neomodel, OGM ani GraphQL.
 - Nie dodawaj MCP Neo4j jako zależności runtime.
 - Dostęp do Neo4j implementuj przez oficjalny async driver.

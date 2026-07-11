@@ -4,25 +4,55 @@ from app.db import NEO4J_DATABASE
 
 
 async def ensure_constraints(driver: AsyncDriver) -> None:
-    query = """
-    CREATE CONSTRAINT person_id_unique IF NOT EXISTS
-    FOR (p:Person)
-    REQUIRE p.id IS UNIQUE
-    """
+    queries = [
+        """
+        CREATE CONSTRAINT person_id_unique IF NOT EXISTS
+        FOR (p:Person)
+        REQUIRE p.id IS UNIQUE
+        """,
+        """
+        CREATE CONSTRAINT city_id_unique IF NOT EXISTS
+        FOR (c:City)
+        REQUIRE c.id IS UNIQUE
+        """,
+        """
+        CREATE INDEX person_name_index IF NOT EXISTS
+        FOR (p:Person)
+        ON (p.name)
+        """,
+        """
+        CREATE INDEX city_name_index IF NOT EXISTS
+        FOR (c:City)
+        ON (c.name)
+        """,
+    ]
 
     async with driver.session(database=NEO4J_DATABASE) as session:
-        result = await session.run(query)
-        await result.consume()
+        for query in queries:
+            result = await session.run(query)
+            await result.consume()
 
 
 async def list_people(driver: AsyncDriver) -> list[dict]:
     query = """
     MATCH (p:Person)
+    OPTIONAL MATCH (p)-[:MIESZKA_W]->(c:City)
+    WITH p, collect(
+        CASE
+            WHEN c IS NULL THEN NULL
+            ELSE {
+                id: c.id,
+                name: c.name,
+                country: properties(c)['country']
+            }
+        END
+    ) AS city_rows
     RETURN
         p.id AS id,
         p.name AS name,
         properties(p)['email'] AS email,
-        properties(p)['note'] AS note
+        properties(p)['note'] AS note,
+        [city IN city_rows WHERE city IS NOT NULL] AS cities
     ORDER BY coalesce(
         properties(p)['updated_at'],
         properties(p)['created_at']
@@ -38,11 +68,23 @@ async def list_people(driver: AsyncDriver) -> list[dict]:
 async def get_person(driver: AsyncDriver, person_id: str) -> dict | None:
     query = """
     MATCH (p:Person {id: $id})
+    OPTIONAL MATCH (p)-[:MIESZKA_W]->(c:City)
+    WITH p, collect(
+        CASE
+            WHEN c IS NULL THEN NULL
+            ELSE {
+                id: c.id,
+                name: c.name,
+                country: properties(c)['country']
+            }
+        END
+    ) AS city_rows
     RETURN
         p.id AS id,
         p.name AS name,
         properties(p)['email'] AS email,
-        properties(p)['note'] AS note
+        properties(p)['note'] AS note,
+        [city IN city_rows WHERE city IS NOT NULL] AS cities
     LIMIT 1
     """
 

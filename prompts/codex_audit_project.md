@@ -6,6 +6,7 @@ Kontekst:
 
 - Aplikacja używa FastAPI, Jinja2, Bootstrap 5 i async Neo4j driver.
 - Neo4j jest obsługiwany przez czysty, parametryzowany Cypher.
+- Aktualny model edukacyjny obejmuje `Person`, `City` oraz relację `MIESZKA_W`.
 - MCP Neo4j może być użyte tylko diagnostycznie.
 - Nie dodawaj zależności runtime i nie modyfikuj `.env`.
 

@@ -20,6 +20,13 @@ Aplikacja ma być rozwijana w kierunku dużego profesjonalnego systemu grafowego
 - agentów,
 - GDS / predykcji relacji.
 
+Aktualny zakres edukacyjny obejmuje:
+
+- węzły `Person`,
+- węzły `City`,
+- relację `(:Person)-[:MIESZKA_W]->(:City)`,
+- prosty interfejs CRUD do ćwiczenia dodawania, edycji i usuwania danych oraz relacji.
+
 ## Architektura obowiązkowa
 
 Nie używaj:

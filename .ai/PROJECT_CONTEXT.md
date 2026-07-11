@@ -1,6 +1,6 @@
 # Project Context
 
-Ten projekt to aplikacja webowa FastAPI + Neo4j. Obecny zakres obejmuje prosty interfejs Jinja2/Bootstrap oraz operacje na węzłach `Person`.
+Ten projekt to aplikacja webowa FastAPI + Neo4j. Obecny zakres obejmuje edukacyjny interfejs Jinja2/Bootstrap oraz operacje na węzłach `Person`, węzłach `City` i relacjach `MIESZKA_W`.
 
 ## Stos
 
@@ -18,12 +18,29 @@ Aplikacja runtime nie może zależeć od MCP. Runtime komunikuje się z bazą wy
 
 Nie dodawaj Django, SQLAlchemy, neomodel, OGM, GraphQL ani synchronicznego drivera Neo4j.
 
+## Aktualny model danych
+
+- `(:Person {id, name, email, note, created_at, updated_at})`
+- `(:City {id, name, country, note, created_at, updated_at})`
+- `(:Person)-[:MIESZKA_W {created_at, updated_at}]->(:City)`
+
+Relacja `MIESZKA_W` jest tworzona przez formularz przypisania osoby do miasta. Usuwanie osoby lub miasta używa ograniczonego `MATCH` po `id` i usuwa także relacje tej encji, żeby można było ćwiczyć pełny cykl CRUD w lokalnej bazie.
+
 ## Obecne pliki aplikacji
 
 - `app/main.py` - endpointy FastAPI, obsługa formularzy, renderowanie Jinja2.
 - `app/db.py` - konfiguracja i cykl życia async drivera Neo4j.
-- `app/people_service.py` - warstwa serwisowa z zapytaniami Cypher.
-- `app/templates/people.html` - widok HTML.
+- `app/people_service.py` - warstwa serwisowa dla `Person` oraz idempotentne constrainty i indeksy.
+- `app/cities_service.py` - warstwa serwisowa dla `City`.
+- `app/relationships_service.py` - warstwa serwisowa dla relacji `MIESZKA_W`.
+- `app/templates/people.html` - jeden edukacyjny widok HTML dla osób, miast i relacji.
+
+## Pliki Cypher
+
+- `cypher/schema.cypher` - constrainty i indeksy dla `Person` oraz `City`.
+- `cypher/diagnostics.cypher` - bezpieczne zapytania odczytujące etykiety, typy relacji, osoby, miasta i `MIESZKA_W`.
+- `cypher/seed_dev.cypher` - niedestrukcyjny seed lokalny oparty o `MERGE`.
+- `cypher/dangerous_reset.cypher` - celowo nieaktywny szablon resetu z ostrzeżeniami.
 
 ## Kierunek rozwoju
 

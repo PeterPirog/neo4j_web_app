@@ -18,8 +18,8 @@
         <a class="navbar-brand" href="/">Neo4j App</a>
 
         <div class="navbar-nav">
-            <a class="nav-link active" href="/">Osoby</a>
-            <a class="nav-link disabled" href="#">Relacje</a>
+            <a class="nav-link active" href="/">Osoby i miasta</a>
+            <a class="nav-link" href="#relacje">Relacje</a>
             <a class="nav-link disabled" href="#">Uprawnienia</a>
             <a class="nav-link disabled" href="#">AI / GraphRAG</a>
         </div>
@@ -29,9 +29,9 @@
 <main class="container py-4">
     <div class="row mb-4">
         <div class="col">
-            <h1 class="h3">FastAPI + Neo4j CRUD</h1>
-            <p class="text-muted">
-                Jedna strona aplikacji webowej: menu, formularz, przyciski i lista danych z Neo4j.
+            <h1 class="h3">Osoby, miasta i relacja MIESZKA_W</h1>
+            <p class="text-muted mb-0">
+                FastAPI + Jinja2 + Bootstrap + parametryzowany Cypher dla lokalnej bazy Neo4j.
             </p>
         </div>
     </div>
@@ -42,11 +42,11 @@
         </div>
     {% endif %}
 
-    <div class="row g-4">
-        <section class="col-lg-4">
+    <div class="row g-4 align-items-start mb-4">
+        <section class="col-xl-4 col-lg-6">
             <div class="card shadow-sm">
                 <div class="card-header">
-                    {% if is_edit_mode %}
+                    {% if is_person_edit_mode %}
                         Edycja osoby
                     {% else %}
                         Dodaj osobę
@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="card-body">
-                    {% if is_edit_mode %}
+                    {% if is_person_edit_mode %}
                         <form method="post" action="/people/update">
                             <input type="hidden" name="person_id" value="{{ selected_person.id }}">
                     {% else %}
@@ -79,7 +79,7 @@
                                 id="email"
                                 name="email"
                                 type="email"
-                                value="{{ selected_person.email if selected_person else '' }}"
+                                value="{{ selected_person.email if selected_person and selected_person.email else '' }}"
                             >
                         </div>
 
@@ -90,19 +90,19 @@
                                 id="note"
                                 name="note"
                                 rows="4"
-                            >{{ selected_person.note if selected_person else '' }}</textarea>
+                            >{{ selected_person.note if selected_person and selected_person.note else '' }}</textarea>
                         </div>
 
                         <div class="d-flex gap-2">
                             <button class="btn btn-primary" type="submit">
-                                {% if is_edit_mode %}
+                                {% if is_person_edit_mode %}
                                     Zapisz
                                 {% else %}
                                     Dodaj
                                 {% endif %}
                             </button>
 
-                            {% if is_edit_mode %}
+                            {% if is_person_edit_mode %}
                                 <a class="btn btn-outline-secondary" href="/">
                                     Anuluj
                                 </a>
@@ -113,10 +113,133 @@
             </div>
         </section>
 
-        <section class="col-lg-8">
+        <section class="col-xl-4 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    {% if is_city_edit_mode %}
+                        Edycja miasta
+                    {% else %}
+                        Dodaj miasto
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    {% if is_city_edit_mode %}
+                        <form method="post" action="/cities/update">
+                            <input type="hidden" name="city_id" value="{{ selected_city.id }}">
+                    {% else %}
+                        <form method="post" action="/cities/create">
+                    {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label" for="city_name">Nazwa miasta</label>
+                            <input
+                                class="form-control"
+                                id="city_name"
+                                name="name"
+                                required
+                                value="{{ selected_city.name if selected_city else '' }}"
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="country">Kraj</label>
+                            <input
+                                class="form-control"
+                                id="country"
+                                name="country"
+                                value="{{ selected_city.country if selected_city and selected_city.country else '' }}"
+                            >
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="city_note">Notatka</label>
+                            <textarea
+                                class="form-control"
+                                id="city_note"
+                                name="note"
+                                rows="4"
+                            >{{ selected_city.note if selected_city and selected_city.note else '' }}</textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">
+                                {% if is_city_edit_mode %}
+                                    Zapisz
+                                {% else %}
+                                    Dodaj
+                                {% endif %}
+                            </button>
+
+                            {% if is_city_edit_mode %}
+                                <a class="btn btn-outline-secondary" href="/">
+                                    Anuluj
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="col-xl-4">
+            <div class="card shadow-sm" id="relacje">
+                <div class="card-header">
+                    Przypisz relację MIESZKA_W
+                </div>
+
+                <div class="card-body">
+                    <form method="post" action="/relationships/lives-in/create">
+                        <div class="mb-3">
+                            <label class="form-label" for="person_id">Osoba</label>
+                            <select
+                                class="form-select"
+                                id="person_id"
+                                name="person_id"
+                                required
+                                {% if not people %}disabled{% endif %}
+                            >
+                                {% for person in people %}
+                                    <option value="{{ person.id }}">{{ person.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="city_id">Miasto</label>
+                            <select
+                                class="form-select"
+                                id="city_id"
+                                name="city_id"
+                                required
+                                {% if not cities %}disabled{% endif %}
+                            >
+                                {% for city in cities %}
+                                    <option value="{{ city.id }}">
+                                        {{ city.name }}{% if city.country %}, {{ city.country }}{% endif %}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="submit"
+                            {% if not people or not cities %}disabled{% endif %}
+                        >
+                            Przypisz
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="row g-4">
+        <section class="col-lg-6">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Lista osób</span>
+                    <span>Osoby</span>
                     <span class="badge text-bg-secondary">{{ people|length }}</span>
                 </div>
 
@@ -136,6 +259,16 @@
                                             {% if person.note %}
                                                 <p class="mb-0 mt-2">{{ person.note }}</p>
                                             {% endif %}
+
+                                            {% if person.cities %}
+                                                <div class="d-flex flex-wrap gap-1 mt-2">
+                                                    {% for city in person.cities %}
+                                                        <span class="badge text-bg-info">
+                                                            MIESZKA_W: {{ city.name }}{% if city.country %}, {{ city.country }}{% endif %}
+                                                        </span>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
                                         </div>
 
                                         <div class="d-flex gap-2 align-items-start">
@@ -152,7 +285,7 @@
                                                 <button
                                                     class="btn btn-sm btn-outline-danger"
                                                     type="submit"
-                                                    onclick="return confirm('Usunąć tę osobę?')"
+                                                    onclick="return confirm('Usunąć tę osobę? Relacje tej osoby też zostaną usunięte.')"
                                                 >
                                                     Usuń
                                                 </button>
@@ -164,7 +297,116 @@
                         </div>
                     {% else %}
                         <p class="text-muted mb-0">
-                            Brak danych. Dodaj pierwszą osobę formularzem po lewej stronie.
+                            Brak osób.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Miasta</span>
+                    <span class="badge text-bg-secondary">{{ cities|length }}</span>
+                </div>
+
+                <div class="card-body">
+                    {% if cities %}
+                        <div class="list-group">
+                            {% for city in cities %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between gap-3">
+                                        <div>
+                                            <h2 class="h5 mb-1">
+                                                {{ city.name }}
+                                                {% if city.country %}
+                                                    <span class="text-muted fw-normal">({{ city.country }})</span>
+                                                {% endif %}
+                                            </h2>
+
+                                            <div class="small text-muted">
+                                                Mieszkańcy w grafie: {{ city.residents_count }}
+                                            </div>
+
+                                            {% if city.note %}
+                                                <p class="mb-0 mt-2">{{ city.note }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="d-flex gap-2 align-items-start">
+                                            <a
+                                                class="btn btn-sm btn-outline-primary"
+                                                href="/?edit_city={{ city.id }}"
+                                            >
+                                                Edytuj
+                                            </a>
+
+                                            <form method="post" action="/cities/delete">
+                                                <input type="hidden" name="city_id" value="{{ city.id }}">
+
+                                                <button
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    type="submit"
+                                                    onclick="return confirm('Usunąć to miasto? Relacje MIESZKA_W do tego miasta też zostaną usunięte.')"
+                                                >
+                                                    Usuń
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Brak miast.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Relacje MIESZKA_W</span>
+                    <span class="badge text-bg-secondary">{{ relationships|length }}</span>
+                </div>
+
+                <div class="card-body">
+                    {% if relationships %}
+                        <div class="list-group">
+                            {% for relationship in relationships %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between gap-3 align-items-start">
+                                        <div>
+                                            <span class="fw-semibold">{{ relationship.person_name }}</span>
+                                            <span class="badge text-bg-dark mx-1">MIESZKA_W</span>
+                                            <span class="fw-semibold">
+                                                {{ relationship.city_name }}{% if relationship.city_country %}, {{ relationship.city_country }}{% endif %}
+                                            </span>
+                                        </div>
+
+                                        <form method="post" action="/relationships/lives-in/delete">
+                                            <input type="hidden" name="person_id" value="{{ relationship.person_id }}">
+                                            <input type="hidden" name="city_id" value="{{ relationship.city_id }}">
+
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                type="submit"
+                                                onclick="return confirm('Usunąć relację MIESZKA_W?')"
+                                            >
+                                                Usuń relację
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Brak relacji MIESZKA_W.
                         </p>
                     {% endif %}
                 </div>

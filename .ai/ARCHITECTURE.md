@@ -34,8 +34,20 @@ Nie używaj synchronicznych sesji ani globalnego klienta innego niż zarządzany
 
 ## Model danych
 
-Aktualny model startowy:
+Aktualny model edukacyjny:
 
 - `(:Person {id, name, email, note, created_at, updated_at})`
+- `(:City {id, name, country, note, created_at, updated_at})`
+- `(:Person)-[:MIESZKA_W {created_at, updated_at}]->(:City)`
+
+Aktualne pliki serwisowe:
+
+- `app/people_service.py` - operacje na osobach i odczyt miast przypisanych przez `MIESZKA_W`.
+- `app/cities_service.py` - operacje na miastach.
+- `app/relationships_service.py` - tworzenie, listowanie i usuwanie relacji `MIESZKA_W`.
+
+Aktualny widok:
+
+- `app/templates/people.html` - jeden widok edukacyjny z formularzami dla osób, miast i relacji.
 
 Docelowo model może obejmować użytkowników, zasoby, role, relacje dostępu, dokumenty, embeddingi i relacje predykcyjne.

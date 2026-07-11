@@ -2,6 +2,21 @@
 
 FastAPI + Jinja2 + Bootstrap 5 application backed by local Neo4j through the official async Neo4j driver.
 
+## Current scope
+
+The app is an educational CRUD interface for a small graph model:
+
+- `(:Person {id, name, email, note, created_at, updated_at})`
+- `(:City {id, name, country, note, created_at, updated_at})`
+- `(:Person)-[:MIESZKA_W {created_at, updated_at}]->(:City)`
+
+The main page lets you:
+
+- create, edit and delete people,
+- create, edit and delete cities,
+- assign or remove the `MIESZKA_W` relationship between a person and a city,
+- inspect people, cities and relationships in one Bootstrap/Jinja2 view.
+
 ## Run locally
 
 ```powershell
@@ -47,5 +62,14 @@ MCP Neo4j is allowed only as an agent diagnostic tool. It must not be added as a
 
 - `cypher/schema.cypher` - safe idempotent constraints and indexes.
 - `cypher/diagnostics.cypher` - read-only diagnostics.
-- `cypher/seed_dev.cypher` - optional non-destructive local seed.
+- `cypher/seed_dev.cypher` - optional non-destructive local seed for people, cities and `MIESZKA_W`.
 - `cypher/dangerous_reset.cypher` - disabled reset template with warnings.
+
+## Runtime files
+
+- `app/main.py` - FastAPI endpoints, form handling, redirects and template rendering.
+- `app/db.py` - async Neo4j driver configuration and FastAPI lifespan.
+- `app/people_service.py` - `Person` queries and shared schema setup.
+- `app/cities_service.py` - `City` queries.
+- `app/relationships_service.py` - `MIESZKA_W` relationship queries.
+- `app/templates/people.html` - one-page educational UI.
