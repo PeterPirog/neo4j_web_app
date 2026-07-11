@@ -219,7 +219,7 @@ __marimo__/
 
 # Local MCP configuration with secrets
 .mcp.neo4j.json
+.ai/mcp/*.json
 .ai/mcp/*.local.json
 
 .idea/
-.ai/
