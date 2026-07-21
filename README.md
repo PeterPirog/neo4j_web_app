@@ -164,6 +164,58 @@ Adres:
 http://127.0.0.1:3000
 ```
 
+## Uruchomienie jednym skryptem
+
+Z root projektu:
+
+```powershell
+python scripts/dev_start.py
+```
+
+Skrypt sprawdza dostępność Neo4j Bolt, uruchamia brakujący backend FastAPI,
+czeka na `/api/health`, generuje OpenAPI client, uruchamia frontend Next.js i
+wypisuje końcowe adresy aplikacji. Nie uruchamia Neo4j samodzielnie i nie
+modyfikuje danych w bazie.
+
+Przydatne flagi:
+
+```powershell
+python scripts/dev_start.py --check-only
+python scripts/dev_start.py --open-browser
+python scripts/dev_start.py --skip-openapi
+python scripts/dev_start.py --api-port 8001 --web-port 3001
+```
+
+`--check-only` tylko sprawdza stan plików i usług: nie tworzy `.env`, nie
+instaluje zależności i nie uruchamia procesów. Jeżeli skrypt uruchomi backend
+lub frontend, zatrzyma tylko własne procesy po `Ctrl+C`. Istniejące procesy na
+portach `8000` lub `3000` są używane, jeśli odpowiadają poprawnie; skrypt nie
+zabija ich automatycznie.
+
+## Zatrzymywanie usług uruchomionych lokalnie
+
+Z root projektu:
+
+```powershell
+python scripts/dev_stop.py --check-only
+python scripts/dev_stop.py --dry-run
+python scripts/dev_stop.py
+python scripts/dev_stop.py --yes
+```
+
+Skrypt zatrzymuje tylko lokalne procesy FastAPI/Uvicorn i Next.js pasujące do
+tego projektu. Domyślne `python scripts/dev_stop.py` działa w dwóch trybach:
+w terminalu pyta `y/N`, a w PyCharm albo innym runnerze bez interaktywnego
+stdin pokazuje okno `Yes/No` przez `tkinter`.
+
+`--dry-run` tylko wypisuje kandydatów i niczego nie zatrzymuje. `--check-only`
+tylko sprawdza porty i procesy. `--yes` zatrzymuje wykryte procesy backendu i
+frontendu bez pytania, co jest przydatne w PyCharm.
+
+Neo4j nie jest zatrzymywany przez ten skrypt. `dev_start.py` tylko sprawdza
+dostępność Neo4j Bolt i nie uruchamia bazy danych, więc `dev_stop.py` celowo nie
+zamyka portów `7474` ani `7687`.
+
 ## Kolejność Uruchamiania
 
 Terminal 1: Neo4j.
