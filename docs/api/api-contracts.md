@@ -1,24 +1,27 @@
 # API Contracts
 
-FastAPI exposes JSON endpoints under `/api`.
+FastAPI exposes canonical JSON endpoints under `/api/v1`.
+
+Legacy `/api` endpoints are kept as compatibility aliases and are hidden from
+OpenAPI.
 
 ## Health
 
-- `GET /api/health`
+- `GET /api/v1/health`
 
 ## People
 
-- `GET /api/people`
-- `POST /api/people`
-- `GET /api/people/{person_id}`
-- `PATCH /api/people/{person_id}`
-- `DELETE /api/people/{person_id}`
+- `GET /api/v1/people`
+- `POST /api/v1/people`
+- `GET /api/v1/people/{person_id}`
+- `PATCH /api/v1/people/{person_id}`
+- `DELETE /api/v1/people/{person_id}`
 
 ## Relations
 
-- `GET /api/relations`
-- `POST /api/relations`
-- `DELETE /api/relations/{relationship_id}`
+- `GET /api/v1/relations`
+- `POST /api/v1/relations`
+- `DELETE /api/v1/relations/{relationship_id}`
 
 Allowed relationship types:
 
@@ -30,10 +33,10 @@ Allowed relationship types:
 
 ## Placeholder Modules
 
-- `GET /api/permissions/health`
-- `GET /api/graph/health`
-- `GET /api/ai/health`
-- `GET /api/ml/health`
+- `GET /api/v1/permissions/health`
+- `GET /api/v1/graph/health`
+- `GET /api/v1/ai/health`
+- `GET /api/v1/ml/health`
 
 ## Generate Client
 

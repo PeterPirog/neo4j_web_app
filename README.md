@@ -29,7 +29,8 @@ w `apps/api/app/legacy_templates/` wyłącznie jako materiał historyczny.
 - `apps/api` - backend FastAPI, moduły API, service layer, repository layer i Cypher query layer.
 - `apps/web` - frontend Next.js App Router, React, TypeScript, Tailwind CSS.
 - `packages/api-client` - klient OpenAPI oparty o `openapi-fetch` i typy generowane z FastAPI.
-- `cypher` - skrypty schematu, constraintów, indeksów, diagnostyki i seedów.
+- `database/neo4j` - docelowe migracje, constrainty, indeksy, diagnostyka i seedy Neo4j.
+- `cypher` - starszy katalog kompatybilnosciowy dla istniejacych lokalnych odwolan.
 - `docs` - dokumentacja architektury, API, frontendu, modelu danych i ADR.
 - `prompts` - prompty robocze dla Codexa.
 - `.ai` - kontekst i reguły dla agentów.
@@ -140,7 +141,8 @@ uvicorn app.main:app --reload --port 8000
 
 Adresy:
 
-- `http://127.0.0.1:8000/api/health`
+- `http://127.0.0.1:8000/api/v1/health`
+- `http://127.0.0.1:8000/api/health` - legacy alias
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/openapi.json`
 
@@ -173,7 +175,7 @@ python scripts/dev_start.py
 ```
 
 Skrypt sprawdza dostępność Neo4j Bolt, uruchamia brakujący backend FastAPI,
-czeka na `/api/health`, generuje OpenAPI client, uruchamia frontend Next.js i
+czeka na `/api/v1/health`, generuje OpenAPI client, uruchamia frontend Next.js i
 wypisuje końcowe adresy aplikacji. Nie uruchamia Neo4j samodzielnie i nie
 modyfikuje danych w bazie.
 
@@ -256,6 +258,7 @@ Backend:
 cd apps/api
 python -m compileall app
 python -c "from app.main import app; print('OK')"
+.\.venv\Scripts\python.exe -m unittest discover -s tests
 ```
 
 OpenAPI, przy działającym backendzie:
@@ -299,19 +302,22 @@ Nie używaj MCP do destrukcyjnych operacji bez wyraźnego polecenia.
 
 ## API Endpoints
 
-- `GET /api/health`
-- `GET /api/people`
-- `POST /api/people`
-- `GET /api/people/{person_id}`
-- `PATCH /api/people/{person_id}`
-- `DELETE /api/people/{person_id}`
-- `GET /api/relations`
-- `POST /api/relations`
-- `DELETE /api/relations/{relationship_id}`
-- `GET /api/permissions/health`
-- `GET /api/graph/health`
-- `GET /api/ai/health`
-- `GET /api/ml/health`
+- `GET /api/v1/health`
+- `GET /api/v1/people`
+- `POST /api/v1/people`
+- `GET /api/v1/people/{person_id}`
+- `PATCH /api/v1/people/{person_id}`
+- `DELETE /api/v1/people/{person_id}`
+- `GET /api/v1/relations`
+- `POST /api/v1/relations`
+- `DELETE /api/v1/relations/{relationship_id}`
+- `GET /api/v1/permissions/health`
+- `GET /api/v1/graph/health`
+- `GET /api/v1/ai/health`
+- `GET /api/v1/ml/health`
+
+Stare endpointy `/api/...` sa utrzymane jako aliasy kompatybilnosciowe, ale
+nowe integracje powinny uzywac `/api/v1/...`.
 
 ## Frontend Routes
 
@@ -412,7 +418,7 @@ NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 
 Sprawdź:
 
-- czy backend odpowiada na `/api/health`,
+- czy backend odpowiada na `/api/v1/health`,
 - czy CORS dopuszcza origin frontendu,
 - czy `packages/api-client/src/schema.d.ts` jest aktualny,
 - czy w terminalu Next.js nie ma błędów requestów.

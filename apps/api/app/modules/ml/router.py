@@ -4,7 +4,7 @@ from app.modules.ml import service
 from app.modules.ml.schemas import ModuleHealth
 
 
-router = APIRouter(prefix="/api/ml", tags=["ml"])
+router = APIRouter(prefix="/ml", tags=["ml"])
 
 
 @router.get("/health", response_model=ModuleHealth)

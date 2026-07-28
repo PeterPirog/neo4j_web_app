@@ -1,18 +1,12 @@
-import { apiClient } from "@/lib/api/client";
 import type {
   RelationshipCreate,
   RelationshipRead,
 } from "@/features/relations/schemas";
-
-function apiError(error: unknown): Error {
-  if (error && typeof error === "object" && "detail" in error) {
-    return new Error(String((error as { detail: unknown }).detail));
-  }
-  return new Error("API request failed");
-}
+import { apiClient } from "@/shared/api/client";
+import { apiError } from "@/shared/api/errors";
 
 export async function fetchRelations(): Promise<RelationshipRead[]> {
-  const { data, error } = await apiClient.GET("/api/relations");
+  const { data, error } = await apiClient.GET("/api/v1/relations");
   if (error) {
     throw apiError(error);
   }
@@ -22,7 +16,7 @@ export async function fetchRelations(): Promise<RelationshipRead[]> {
 export async function createRelationship(
   payload: RelationshipCreate,
 ): Promise<RelationshipRead> {
-  const { data, error } = await apiClient.POST("/api/relations", {
+  const { data, error } = await apiClient.POST("/api/v1/relations", {
     body: payload,
   });
   if (error || !data) {
@@ -33,7 +27,7 @@ export async function createRelationship(
 
 export async function deleteRelationship(relationshipId: string): Promise<boolean> {
   const { data, error } = await apiClient.DELETE(
-    "/api/relations/{relationship_id}",
+    "/api/v1/relations/{relationship_id}",
     {
       params: { path: { relationship_id: relationshipId } },
     },

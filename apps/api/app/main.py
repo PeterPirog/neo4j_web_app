@@ -1,27 +1,18 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from app.api.health import HealthResponse, health as api_health
+from app.api.v1.router import api_v1_router, legacy_api_router
 from app.core.cors import configure_cors
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
-from app.db.neo4j import neo4j_lifespan, neo4j_manager
-from app.modules.ai.router import router as ai_router
-from app.modules.graph_explorer.router import router as graph_explorer_router
-from app.modules.ml.router import router as ml_router
-from app.modules.people.router import router as people_router
-from app.modules.permissions.router import router as permissions_router
-from app.modules.relations.router import router as relations_router
+from app.db.neo4j import neo4j_lifespan
 
 
 class RootResponse(BaseModel):
     service: str
     architecture: str
     api_docs: str
-
-
-class HealthResponse(BaseModel):
-    status: str
-    neo4j: str
 
 
 configure_logging()
@@ -35,12 +26,8 @@ app = FastAPI(
 configure_cors(app)
 register_exception_handlers(app)
 
-app.include_router(people_router)
-app.include_router(relations_router)
-app.include_router(permissions_router)
-app.include_router(graph_explorer_router)
-app.include_router(ai_router)
-app.include_router(ml_router)
+app.include_router(api_v1_router)
+app.include_router(legacy_api_router)
 
 
 @app.get("/", response_model=RootResponse)
@@ -52,12 +39,6 @@ async def root() -> RootResponse:
     )
 
 
-@app.get("/api/health", response_model=HealthResponse)
-async def health() -> HealthResponse:
-    await neo4j_manager.verify_connectivity()
-    return HealthResponse(status="ok", neo4j="connected")
-
-
 @app.get("/health", response_model=HealthResponse, include_in_schema=False)
 async def legacy_health() -> HealthResponse:
-    return await health()
+    return await api_health()

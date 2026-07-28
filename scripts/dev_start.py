@@ -25,6 +25,7 @@ from pathlib import Path
 
 
 HOST = "127.0.0.1"
+API_PREFIX = "/api/v1"
 
 
 @dataclass
@@ -78,6 +79,21 @@ def wait_for_url(url: str, timeout_seconds: int, label: str) -> bool:
             print(f"[ok] {label}: {url}")
             return True
         last_error = f"status={status}, body={body[:300]}"
+        time.sleep(1)
+    print(f"[error] {label} did not respond in {timeout_seconds}s: {last_error}")
+    return False
+
+
+def wait_for_any_url(urls: tuple[str, ...], timeout_seconds: int, label: str) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    last_error = ""
+    while time.monotonic() < deadline:
+        for url in urls:
+            ok, status, body = http_get(url, timeout_seconds=5)
+            if ok:
+                print(f"[ok] {label}: {url}")
+                return True
+            last_error = f"{url}: status={status}, body={body[:300]}"
         time.sleep(1)
     print(f"[error] {label} did not respond in {timeout_seconds}s: {last_error}")
     return False
@@ -182,9 +198,12 @@ def ensure_file_exists(path: Path, label: str) -> None:
 def check_project_layout(project_root: Path) -> None:
     ensure_file_exists(project_root / "apps" / "api", "apps/api")
     ensure_file_exists(project_root / "apps" / "api" / "app" / "main.py", "FastAPI app.main")
+    ensure_file_exists(project_root / "apps" / "api" / "app" / "api" / "v1" / "router.py", "FastAPI API v1 router")
     ensure_file_exists(project_root / "apps" / "api" / "requirements.txt", "backend requirements.txt")
     ensure_file_exists(project_root / "apps" / "web", "apps/web")
     ensure_file_exists(project_root / "apps" / "web" / "package.json", "web package.json")
+    ensure_file_exists(project_root / "packages" / "api-client" / "src" / "index.ts", "generated API client package")
+    ensure_file_exists(project_root / "database" / "neo4j" / "migrations", "Neo4j migrations directory")
     ensure_file_exists(project_root / "package.json", "root package.json")
 
 
@@ -279,13 +298,20 @@ def check_python_venv(project_root: Path, install: bool, no_install: bool, check
 
 
 def backend_health_url(api_port: int) -> str:
-    return f"http://{HOST}:{api_port}/api/health"
+    return f"http://{HOST}:{api_port}{API_PREFIX}/health"
+
+
+def backend_health_urls(api_port: int) -> tuple[str, ...]:
+    return (
+        backend_health_url(api_port),
+        f"http://{HOST}:{api_port}/api/health",
+    )
 
 
 def start_backend_if_needed(project_root: Path, venv_python: Path, api_port: int) -> None:
-    url = backend_health_url(api_port)
+    urls = backend_health_urls(api_port)
     if is_port_open(HOST, api_port):
-        if wait_for_url(url, 8, "backend"):
+        if wait_for_any_url(urls, 8, "backend"):
             print(f"[ok] backend already running on port {api_port}")
             return
         raise RuntimeError(
@@ -299,7 +325,7 @@ def start_backend_if_needed(project_root: Path, venv_python: Path, api_port: int
         cwd=api_dir,
         label="backend",
     )
-    if not wait_for_url(url, 60, "backend"):
+    if not wait_for_any_url(urls, 60, "backend"):
         print("[backend stdout]")
         print(tail_file(started.stdout_path))
         print("[backend stderr]")
@@ -417,8 +443,13 @@ def check_only(project_root: Path, args: argparse.Namespace) -> int:
 
     ok = check_neo4j_port(args.neo4j_bolt_port, check_only=True) and ok
 
-    backend_ok, backend_status, _ = http_get(backend_health_url(args.api_port), timeout_seconds=3)
-    print(f"[check] backend health: ok={backend_ok}, status={backend_status}")
+    backend_results = [
+        (url, *http_get(url, timeout_seconds=3)[:2])
+        for url in backend_health_urls(args.api_port)
+    ]
+    backend_ok = any(result[1] for result in backend_results)
+    for url, url_ok, status in backend_results:
+        print(f"[check] backend health {url}: ok={url_ok}, status={status}")
     ok = backend_ok and ok
 
     frontend_ok, frontend_status, _ = http_get(frontend_url(args.web_port), timeout_seconds=3)

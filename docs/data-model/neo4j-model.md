@@ -1,5 +1,10 @@
 # Neo4j Model
 
+Canonical database assets live under `database/neo4j`.
+
+The older `cypher/` directory is retained while local scripts and docs migrate
+to the long-term structure.
+
 ## Current Nodes
 
 ### Person

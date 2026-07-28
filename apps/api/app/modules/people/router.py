@@ -9,7 +9,7 @@ from app.modules.people.schemas import (
 )
 
 
-router = APIRouter(prefix="/api/people", tags=["people"])
+router = APIRouter(prefix="/people", tags=["people"])
 
 
 @router.get("", response_model=list[PersonRead])

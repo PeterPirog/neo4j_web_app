@@ -4,7 +4,7 @@ from app.modules.ai import service
 from app.modules.ai.schemas import ModuleHealth
 
 
-router = APIRouter(prefix="/api/ai", tags=["ai"])
+router = APIRouter(prefix="/ai", tags=["ai"])
 
 
 @router.get("/health", response_model=ModuleHealth)

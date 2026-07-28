@@ -8,7 +8,7 @@ from app.modules.relations.schemas import (
 )
 
 
-router = APIRouter(prefix="/api/relations", tags=["relations"])
+router = APIRouter(prefix="/relations", tags=["relations"])
 
 
 @router.get("", response_model=list[RelationshipRead])

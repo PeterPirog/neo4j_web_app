@@ -44,6 +44,12 @@ Direct database access from a browser would expose credentials, bypass backend
 authorization and make Cypher part of the public client. All browser traffic
 must go through FastAPI.
 
+## API Versioning
+
+Canonical API routes live under `/api/v1`. Legacy `/api` routes can remain as
+temporary compatibility aliases, but generated OpenAPI clients should target the
+versioned routes.
+
 ## Why FastAPI Is The Contract Layer
 
 FastAPI provides Pydantic validation, generated OpenAPI and a stable JSON API
@@ -53,3 +59,9 @@ for frontend, tests and future integrations.
 
 Keeping Cypher in `queries.py` makes database behavior reviewable and prevents
 route handlers or frontend code from embedding graph logic.
+
+## Neo4j Assets
+
+Long-term Neo4j migrations, constraints, indexes, seeds and diagnostics live in
+`database/neo4j`. Runtime code may verify required schema compatibility, but
+reviewed migrations are the canonical database change path.

@@ -17,7 +17,17 @@ uvicorn app.main:app --reload --port 8000
 
 ## Health
 
-Open `http://127.0.0.1:8000/api/health`.
+Open `http://127.0.0.1:8000/api/v1/health`.
+
+The legacy `http://127.0.0.1:8000/api/health` route remains available as a
+compatibility alias.
+
+## Tests
+
+```powershell
+cd apps/api
+.\.venv\Scripts\python.exe -m unittest discover -s tests
+```
 
 ## Architecture
 

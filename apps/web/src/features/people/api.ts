@@ -1,15 +1,9 @@
-import { apiClient } from "@/lib/api/client";
 import type { PersonCreate, PersonRead, PersonUpdate } from "@/features/people/schemas";
-
-function apiError(error: unknown): Error {
-  if (error && typeof error === "object" && "detail" in error) {
-    return new Error(String((error as { detail: unknown }).detail));
-  }
-  return new Error("API request failed");
-}
+import { apiClient } from "@/shared/api/client";
+import { apiError } from "@/shared/api/errors";
 
 export async function fetchPeople(): Promise<PersonRead[]> {
-  const { data, error } = await apiClient.GET("/api/people");
+  const { data, error } = await apiClient.GET("/api/v1/people");
   if (error) {
     throw apiError(error);
   }
@@ -17,7 +11,7 @@ export async function fetchPeople(): Promise<PersonRead[]> {
 }
 
 export async function createPerson(payload: PersonCreate): Promise<PersonRead> {
-  const { data, error } = await apiClient.POST("/api/people", {
+  const { data, error } = await apiClient.POST("/api/v1/people", {
     body: payload,
   });
   if (error || !data) {
@@ -30,7 +24,7 @@ export async function updatePerson(args: {
   personId: string;
   payload: PersonUpdate;
 }): Promise<PersonRead> {
-  const { data, error } = await apiClient.PATCH("/api/people/{person_id}", {
+  const { data, error } = await apiClient.PATCH("/api/v1/people/{person_id}", {
     params: { path: { person_id: args.personId } },
     body: args.payload,
   });
@@ -41,7 +35,7 @@ export async function updatePerson(args: {
 }
 
 export async function deletePerson(personId: string): Promise<boolean> {
-  const { data, error } = await apiClient.DELETE("/api/people/{person_id}", {
+  const { data, error } = await apiClient.DELETE("/api/v1/people/{person_id}", {
     params: { path: { person_id: personId } },
   });
   if (error || !data) {
