@@ -293,6 +293,21 @@ MATCH (p:Person) RETURN count(p) AS people_count;
 
 Nie używaj MCP do destrukcyjnych operacji bez wyraźnego polecenia.
 
+### Konfiguracja MCP dla agentów
+
+Projekt zawiera gotowe pliki konfiguracyjne MCP Neo4j:
+
+- `opencode.jsonc` – konfiguracja MCP dla OpenCode (używa zmiennych środowiskowych)
+- `.mcp.neo4j.example.json` – przykład konfiguracji dla innych klientów MCP (Cursor, Claude Desktop itp.)
+
+**OpenCode** – po skopiowaniu `.env.example` → `.env` i ustawieniu hasła, MCP Neo4j
+jest automatycznie dostępne po uruchomieniu `opencode` w katalogu projektu.
+
+**Inne klienty MCP** – skopiuj `.mcp.neo4j.example.json` do odpowiedniego pliku
+konfiguracyjnego klienta (np. `.cursor/mcp.json` dla Cursor) i podmień hasło.
+
+Szczegółowe zasady użycia MCP Neo4j przez agentów znajdują się w `.ai/MCP_NEO4J_GUIDE.md`.
+
 ## Porty
 
 - Neo4j Browser: zwykle `7474`.
