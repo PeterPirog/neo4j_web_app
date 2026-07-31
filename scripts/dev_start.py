@@ -26,6 +26,7 @@ from pathlib import Path
 
 HOST = "127.0.0.1"
 API_PREFIX = "/api/v1"
+DEFAULT_FRONTEND_PORT = 3000
 
 
 @dataclass
@@ -308,11 +309,33 @@ def backend_health_urls(api_port: int) -> tuple[str, ...]:
     )
 
 
-def start_backend_if_needed(project_root: Path, venv_python: Path, api_port: int) -> None:
+def cors_origins_for_web_port(web_port: int) -> str:
+    origins = [
+        os.environ.get("CORS_ORIGINS", ""),
+        f"http://localhost:{DEFAULT_FRONTEND_PORT}",
+        f"http://127.0.0.1:{DEFAULT_FRONTEND_PORT}",
+        f"http://localhost:{web_port}",
+        f"http://127.0.0.1:{web_port}",
+    ]
+    unique_origins = []
+    for origin_group in origins:
+        for origin in origin_group.split(","):
+            stripped = origin.strip()
+            if stripped and stripped not in unique_origins:
+                unique_origins.append(stripped)
+    return ",".join(unique_origins)
+
+
+def start_backend_if_needed(project_root: Path, venv_python: Path, api_port: int, web_port: int) -> None:
     urls = backend_health_urls(api_port)
     if is_port_open(HOST, api_port):
         if wait_for_any_url(urls, 8, "backend"):
             print(f"[ok] backend already running on port {api_port}")
+            if web_port != DEFAULT_FRONTEND_PORT:
+                print(
+                    "[warn] Existing backend must allow the custom frontend origin. "
+                    "Set CORS_ORIGINS if browser requests are blocked."
+                )
             return
         raise RuntimeError(
             f"Port {api_port} is busy, but it does not look like this project's backend. "
@@ -320,10 +343,13 @@ def start_backend_if_needed(project_root: Path, venv_python: Path, api_port: int
         )
 
     api_dir = project_root / "apps" / "api"
+    env = os.environ.copy()
+    env["CORS_ORIGINS"] = cors_origins_for_web_port(web_port)
     started = start_process(
         [str(venv_python), "-m", "uvicorn", "app.main:app", "--reload", "--port", str(api_port)],
         cwd=api_dir,
         label="backend",
+        env=env,
     )
     if not wait_for_any_url(urls, 60, "backend"):
         print("[backend stdout]")
@@ -467,7 +493,7 @@ def wait_until_interrupted() -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Start local Neo4j Web App development services.")
     parser.add_argument("--api-port", type=int, default=8000, help="FastAPI port, default: 8000")
-    parser.add_argument("--web-port", type=int, default=3000, help="Next.js port, default: 3000")
+    parser.add_argument("--web-port", type=int, default=DEFAULT_FRONTEND_PORT, help="Next.js port, default: 3000")
     parser.add_argument("--neo4j-bolt-port", type=int, default=7687, help="Neo4j Bolt port, default: 7687")
     parser.add_argument("--skip-openapi", action="store_true", help="Skip OpenAPI client generation")
     parser.add_argument("--check-only", action="store_true", help="Only check service state; do not start or modify anything")
@@ -502,7 +528,7 @@ def main() -> int:
             no_install=args.no_install,
             check_only=False,
         )
-        start_backend_if_needed(project_root, venv_python, args.api_port)
+        start_backend_if_needed(project_root, venv_python, args.api_port, args.web_port)
         generate_openapi_client(project_root, args.api_port, args.skip_openapi)
 
         ensure_node_modules(project_root, install=args.install, no_install=args.no_install, check_only=False)

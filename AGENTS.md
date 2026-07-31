@@ -15,7 +15,9 @@ This repository is being developed as a long-term Neo4j graph application with:
 The current implemented domain covers:
 
 - `Person` nodes.
+- `City` nodes.
 - Whitelisted Person-to-Person relationships.
+- Person-to-City `MIESZKA_W` relationships.
 - Placeholder modules for permissions, graph explorer, AI / GraphRAG and ML.
 
 Legacy Jinja2 templates from the educational app are preserved in

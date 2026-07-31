@@ -28,12 +28,15 @@ FastAPI communicates with Neo4j through:
 ## Current Domain
 
 - `Person` nodes.
+- `City` nodes.
 - Whitelisted Person-to-Person relationships:
   - `KNOWS`
   - `WORKS_WITH`
   - `MANAGES`
   - `REPORTS_TO`
   - `RELATED_TO`
+- Person-to-City relationships:
+  - `MIESZKA_W`
 
 Placeholder modules:
 

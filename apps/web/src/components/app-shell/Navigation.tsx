@@ -8,7 +8,9 @@ import { cn } from "@/lib/cn";
 const links = [
   { href: "/", label: "Dashboard" },
   { href: "/people", label: "People" },
+  { href: "/cities", label: "Cities" },
   { href: "/relations", label: "Relations" },
+  { href: "/residences", label: "Residences" },
 ];
 
 const disabledLinks = ["Permissions", "AI / GraphRAG", "ML"];

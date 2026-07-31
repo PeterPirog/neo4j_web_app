@@ -7,16 +7,27 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+DEFAULT_CORS_ORIGINS = (
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+)
+
+
+def _csv_env(name: str, default: tuple[str, ...]) -> tuple[str, ...]:
+    value = os.getenv(name)
+    if not value:
+        return default
+    items = tuple(item.strip() for item in value.split(",") if item.strip())
+    return items or default
+
+
 @dataclass(frozen=True)
 class Settings:
     neo4j_uri: str = os.getenv("NEO4J_URI", "bolt://localhost:7687")
     neo4j_username: str = os.getenv("NEO4J_USERNAME", "neo4j")
     neo4j_password: str = os.getenv("NEO4J_PASSWORD", "")
     neo4j_database: str = os.getenv("NEO4J_DATABASE", "neo4j")
-    cors_origins: tuple[str, ...] = (
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    )
+    cors_origins: tuple[str, ...] = _csv_env("CORS_ORIGINS", DEFAULT_CORS_ORIGINS)
 
 
 settings = Settings()

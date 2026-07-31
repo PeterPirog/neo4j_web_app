@@ -49,9 +49,11 @@ def get_neo4j_driver() -> AsyncDriver:
 @asynccontextmanager
 async def neo4j_lifespan(app: FastAPI) -> AsyncIterator[None]:
     await neo4j_manager.connect()
+    from app.modules.cities.repository import ensure_city_constraints
     from app.modules.people.repository import ensure_person_constraints
 
     await ensure_person_constraints(neo4j_manager.get_driver())
+    await ensure_city_constraints(neo4j_manager.get_driver())
     try:
         yield
     finally:

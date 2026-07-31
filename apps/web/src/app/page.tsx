@@ -42,6 +42,19 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="p-5">
+          <h2 className="text-lg font-semibold">Cities</h2>
+          <p className="mt-2 text-sm leading-6 text-stone-600">
+            Manage City nodes as a second graph entity type.
+          </p>
+          <Link
+            className="mt-4 inline-flex text-sm font-semibold text-graph-accent hover:text-emerald-800"
+            href="/cities"
+          >
+            Open Cities
+          </Link>
+        </Card>
+
+        <Card className="p-5">
           <h2 className="text-lg font-semibold">Relations</h2>
           <p className="mt-2 text-sm leading-6 text-stone-600">
             Create whitelisted Person-to-Person relationships with validated
@@ -52,6 +65,19 @@ export default function DashboardPage() {
             href="/relations"
           >
             Open Relations
+          </Link>
+        </Card>
+
+        <Card className="p-5">
+          <h2 className="text-lg font-semibold">Residences</h2>
+          <p className="mt-2 text-sm leading-6 text-stone-600">
+            Connect Person and City nodes through MIESZKA_W relationships.
+          </p>
+          <Link
+            className="mt-4 inline-flex text-sm font-semibold text-graph-accent hover:text-emerald-800"
+            href="/residences"
+          >
+            Open Residences
           </Link>
         </Card>
       </section>

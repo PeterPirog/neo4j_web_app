@@ -21,6 +21,10 @@ Async Neo4j driver / neo4j-rust-ext
 Neo4j
 ```
 
+Aktywny przyklad domenowy pokazuje dwie encje grafowe: `Person` i `City`.
+Relacje obejmuja whitelistowane Person-to-Person oraz statyczna relacje
+`(:Person)-[:MIESZKA_W]->(:City)`.
+
 Docelowy frontend to `apps/web`. Stary edukacyjny szablon Jinja2 jest zachowany
 w `apps/api/app/legacy_templates/` wyłącznie jako materiał historyczny.
 
@@ -104,6 +108,7 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=change_me
 NEO4J_DATABASE=neo4j
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
 ```
 
@@ -193,6 +198,11 @@ instaluje zależności i nie uruchamia procesów. Jeżeli skrypt uruchomi backen
 lub frontend, zatrzyma tylko własne procesy po `Ctrl+C`. Istniejące procesy na
 portach `8000` lub `3000` są używane, jeśli odpowiadają poprawnie; skrypt nie
 zabija ich automatycznie.
+
+Przy niestandardowym porcie frontendu backend musi dopuszczac odpowiadajacy
+origin CORS. Gdy `dev_start.py` sam uruchamia backend, ustawia `CORS_ORIGINS`
+dla wybranego `--web-port`. Gdy backend juz dziala, trzeba zadbac o to w jego
+lokalnym `.env`.
 
 ## Zatrzymywanie usług uruchomionych lokalnie
 
@@ -323,9 +333,17 @@ Szczegółowe zasady użycia MCP Neo4j przez agentów znajdują się w `.ai/MCP_
 - `GET /api/v1/people/{person_id}`
 - `PATCH /api/v1/people/{person_id}`
 - `DELETE /api/v1/people/{person_id}`
+- `GET /api/v1/cities`
+- `POST /api/v1/cities`
+- `GET /api/v1/cities/{city_id}`
+- `PATCH /api/v1/cities/{city_id}`
+- `DELETE /api/v1/cities/{city_id}`
 - `GET /api/v1/relations`
 - `POST /api/v1/relations`
 - `DELETE /api/v1/relations/{relationship_id}`
+- `GET /api/v1/residences`
+- `POST /api/v1/residences`
+- `DELETE /api/v1/residences/{person_id}/{city_id}`
 - `GET /api/v1/permissions/health`
 - `GET /api/v1/graph/health`
 - `GET /api/v1/ai/health`
@@ -338,7 +356,9 @@ nowe integracje powinny uzywac `/api/v1/...`.
 
 - `/`
 - `/people`
+- `/cities`
 - `/relations`
+- `/residences`
 
 ## Zasady Architektury
 
@@ -397,6 +417,13 @@ http://127.0.0.1:3000
 
 Jeżeli frontend działa na innym porcie, trzeba świadomie dodać origin w
 `apps/api/app/core/config.py`.
+
+Aktualnie zalecany sposob konfiguracji dodatkowych originow to zmienna
+`CORS_ORIGINS` w `apps/api/.env`, np.:
+
+```text
+CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+```
 
 ### OpenAPI generation fails
 

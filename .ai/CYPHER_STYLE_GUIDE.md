@@ -55,7 +55,7 @@ MATCH (r:Resource {id: $resource_id})
 MERGE (u)-[:CAN_ACCESS]->(r)
 ```
 
-Aktualna relacja edukacyjna w projekcie:
+Aktualna relacja Person-to-City w projekcie:
 
 ```cypher
 MATCH (p:Person {id: $person_id})
